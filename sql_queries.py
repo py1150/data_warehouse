@@ -60,9 +60,25 @@ song_table_create = ("""
 """)
 
 artist_table_create = ("""
+    CREATE TABLE artists (
+        artist_id VARCHAR(50) NOT NULL,\
+        name VARCHAR(100) NOT NULL,\
+        location VARCHAR(100),\
+        latitude DOUBLE PRECISION,\
+        longitude DOUBLE PRECISION
+    );
 """)
 
 time_table_create = ("""
+    CREATE TABLE time (
+        start_time TIMESTAMP NOT NULL,\
+        hour INTEGER NOT NULL,\
+        day VARCHAR(25) NOT NULL,\
+        week INTEGER NOT NULL,\
+        month VARCHAR(50) NOT NULL,\
+        year INTEGER NOT NULL,\
+        weekday VARCHAR(50) NOT NULL\        
+    );
 """)
 
 # STAGING TABLES
