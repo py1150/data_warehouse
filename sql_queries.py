@@ -51,9 +51,7 @@ staging_songs_table_create = ("""
         song_id VARCHAR(50),\
         title VARCHAR(200),\
         duration VARCHAR(50),\
-        song_id VARCHAR(50),\
-        song_id VARCHAR(50),\
-        artist_id VARCHAR(50),\
+        year INTEGER\
     );
 """)
 
@@ -134,12 +132,35 @@ staging_songs_copy = ("""
 # FINAL TABLES
 
 songplay_table_insert = ("""
+    INSERT INTO songplay (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
+    SELECT\
+        user_id,\
+        
+    FROM staging_events....\
+
 """)
 
 user_table_insert = ("""
+    INSERT INTO users (user_id, first_name, last_name, gender, level)\
+    SELECT\
+        user_id,\
+        firstName,\
+        lastName,\
+        gender,\
+        level\
+    FROM staging_events\
 """)
 
 song_table_insert = ("""
+    INSERT INTO song (song_id,title,artist_id,year, duration)\
+    SELECT\
+        song_id,\
+        title,\
+        artist_id,\
+        year,\
+        duration\
+    FROM staging_songs\
+    ;
 """)
 
 artist_table_insert = ("""
