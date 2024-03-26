@@ -98,3 +98,10 @@ Star schema
 
 
 ## . Example Queries
+
+## References
+- AWS Redshift Documentation
+
+https://docs.aws.amazon.com/redshift/latest/dg/r_DATE_PART_function.html
+
+https://docs.aws.amazon.com/redshift/latest/dg/r_TO_TIMESTAMP.html

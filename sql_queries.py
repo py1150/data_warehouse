@@ -18,15 +18,49 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 # CREATE TABLES
 
 staging_events_table_create= ("""
+    CREATE TABLE staging_events (\
+        artist VARCHAR(200),\
+        auth VARCHAR(20),\
+        firstName VARCHAR(50),\
+        gender VARCHAR(5),\
+        itemInSession INTEGER,\
+        lastName VARCHAR(50),\
+        length DOUBLE PRECISION,\
+        level VARCHAR(200),\
+        location VARCHAR(100),\
+        method VARCHAR(10),\
+        page VARCHAR(200),\
+        registration DOUBLE PRECISION,\
+        sessionID INTEGER,\
+        song VARCHAR(200),\
+        status INTEGER,\
+        ts INTEGER,\
+        userAgent VARCHAR(100),\
+        userID INTEGER\
+    );
 """)
 
 staging_songs_table_create = ("""
+    CREATE TABLE staging_songs (\
+        num_songs INTEGER,\
+        artist_id VARCHAR(50),\
+        artist_latitude DOUBLE PRECISION,\
+        artist_longitude DOUBLE PRECISION,\
+        artist_location VARCHAR(100),\
+        artist_name VARCHAR(100),\
+        song_id VARCHAR(50),\
+        title VARCHAR(200),\
+        duration VARCHAR(50),\
+        song_id VARCHAR(50),\
+        song_id VARCHAR(50),\
+        artist_id VARCHAR(50),\
+    );
 """)
 
    
 
 songplay_table_create = ("""
-    CREATE TABLE songplays (
+    CREATE TABLE songplays (\
         songplay_id INTEGER NOT NULL,\
         start_time TIMESTAMP NOT NULL,\
         user_id  INTEGER NOT NULL,\
@@ -40,7 +74,7 @@ songplay_table_create = ("""
 """)
 
 user_table_create = ("""
-    CREATE TABLE users (
+    CREATE TABLE users (\
         user_id INTEGER NOT NULL,\
         first_name VARCHAR(50) NOT NULL,\
         last_name VARCHAR(50) NOT NULL,\
@@ -50,7 +84,7 @@ user_table_create = ("""
 """)
 
 song_table_create = ("""
-    CREATE TABLE songs (
+    CREATE TABLE songs (\
         song_id VARCHAR(50) NOT NULL,\
         title VARCHAR(200) NOT NULL,\
         artist_id VARCHAR(50) NOT NULL,\
@@ -60,7 +94,7 @@ song_table_create = ("""
 """)
 
 artist_table_create = ("""
-    CREATE TABLE artists (
+    CREATE TABLE artists (\
         artist_id VARCHAR(50) NOT NULL,\
         name VARCHAR(100) NOT NULL,\
         location VARCHAR(100),\
@@ -70,34 +104,32 @@ artist_table_create = ("""
 """)
 
 time_table_create = ("""
-    CREATE TABLE time (
+    CREATE TABLE time (\
         start_time TIMESTAMP NOT NULL,\
         hour INTEGER NOT NULL,\
-        day VARCHAR(25) NOT NULL,\
+        day INTEGER NOT NULL,\
         week INTEGER NOT NULL,\
-        month VARCHAR(50) NOT NULL,\
+        month INTEGER NOT NULL,\
         year INTEGER NOT NULL,\
-        weekday VARCHAR(50) NOT NULL\        
+        weekday INTEGER NOT NULL\        
     );
 """)
 
 # STAGING TABLES
 
-json mapping must be inserted
-%%time
-qry = """
-    copy sporting_event_ticket from 's3://udacity-labs/tickets/split/part'
-    credentials 'aws_iam_role={}'
-    gzip delimiter ';' compupdate off region 'us-west-2';
-""".format(DWH_ROLE_ARN)
-
-%sql $qry
 
 staging_events_copy = ("""
-""").format()
+    copy sporting_event_ticket from 's3://udacity-dend/log_data'
+    credentials 'aws_iam_role={}'
+    gzip delimiter ';' compupdate off region 'us-west-2';
+    format as JSON 's3://udacity-dend/log_json_path.json';
+""").format(DWH_ROLE_ARN)
 
 staging_songs_copy = ("""
-""").format()
+    copy sporting_event_ticket from 's3://udacity-dend/song_data'
+    credentials 'aws_iam_role={}'
+    gzip delimiter ';' compupdate off region 'us-west-2';
+""").format(DWH_ROLE_ARN)
 
 # FINAL TABLES
 
@@ -111,10 +143,32 @@ song_table_insert = ("""
 """)
 
 artist_table_insert = ("""
+    INSERT INTO artist (artist_id,name,location,latitude,longitude)\
+    SELECT\
+        artist_id,\
+        artist_name,\
+        artist_location,\
+        artist_latitude,\
+        artist_longitude\
+    FROM staging_songs\
+    ;
 """)
 
 time_table_insert = ("""
+    INSERT INTO time (start_time,hour,day,week,month,year,weekday)\
+    SELECT\
+        TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS'),\
+        DATE_PART(hour,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
+        DATE_PART(day,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
+        DATE_PART(week,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
+        DATE_PART(month,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
+        DATE_PART(year,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
+        DATE_PART(dayofweek,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
+    FROM staging_events\
+    ;
 """)
+
+
 
 # QUERY LISTS
 
