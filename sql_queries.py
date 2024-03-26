@@ -134,10 +134,20 @@ staging_songs_copy = ("""
 songplay_table_insert = ("""
     INSERT INTO songplay (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
     SELECT\
-        user_id,\
-        
-    FROM staging_events....\
-
+        events.songplay_id,\
+        CONCAT(LPAD(TO_CHAR(events.userID),4,'0'), CONCAT( LPAD(TO_CHAR(events.sessionID),5,'0'), LPAD(TO_CHAR(events.itemInSession),3,'0'))),\
+        TO_TIMESTAMP(events.ts, 'YYYY-MM-DD HH24:MI:SS'),\
+        events.user_id,\
+        events.level,\
+        songs.song_id,\
+        songs.artist_id,\
+        events.session_id,\
+        events.location,\
+        events.user_agent\
+    FROM staging_events as events\
+    JOIN staging_songs as songs\
+        on
+    ;\
 """)
 
 user_table_insert = ("""

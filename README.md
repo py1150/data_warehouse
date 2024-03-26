@@ -105,3 +105,7 @@ Star schema
 https://docs.aws.amazon.com/redshift/latest/dg/r_DATE_PART_function.html
 
 https://docs.aws.amazon.com/redshift/latest/dg/r_TO_TIMESTAMP.html
+
+https://docs.aws.amazon.com/redshift/latest/dg/r_LPAD.html
+
+https://docs.aws.amazon.com/redshift/latest/dg/r_CONCAT.html
