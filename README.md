@@ -7,6 +7,23 @@
     yellow { color: yellow }
 </style>
 
+<green>
+- 2024/03/27
+    - create_tables.py: 
+        - review data types - see Eagar(2023) p.278f  [x]
+            - assign minimal storage size
+        - update staging tales
+            - use merge functionality
+             --> this handles duplicates
+                --> we use distinct                 [x]
+    - AWS console
+        - create new IAM user
+        (with myRedshift role)
+    - new codes
+        - create redshift cluster
+        - destroy redhisft cluster
+</green>
+
 # Data_warehouse
 Udacity Nanodegree Data Engineering with AWS Project 2
 
@@ -17,6 +34,13 @@ The database... purpose....
 ## Project Overview / Workflow
 - source data sets
 - staging, final tables
+
+- Execution:   
+    - 0. set credentials / create redshift cluster
+    - 1. create_tables.py
+    - 2. etl.py
+
+    
 
 ## 1. Code Worfklow
 **etl.py**   
@@ -52,7 +76,20 @@ DB_PORT=
 
 ## 2. Schema for Song Play Analysis
 
-Star schema
+Principles
+- Star schema
+- 2 major data types: character, numeric
+- if there is a choice, we assign the smallest possible size
+    - avoid excess capacities 
+    - e.g., column gender is filled with 1 character with 1 byte ('F' or 'M') --> we can assign a fixed one-byte character: CHAR(1)
+    - allocate enough space to avoid insertion errors
+
+Insertion
+- when inserting we 
+    - create a temporary staging table
+    - we insert into the final tables from the staging tables
+    - we only select distinct rows
+    - delete the staging table after we are done
 
 **Fact Table**
 1. songplays - records in event data associated with song plays i.e. records with page ```NextSong```
@@ -71,7 +108,7 @@ Star schema
     - user_id
     - first_name
     - last_name
-    - gender
+    - gender: 1 ASCII character --> 1 byte
     - level
 3. songs - songs in music database
     - song_id

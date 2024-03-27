@@ -22,18 +22,18 @@ staging_events_table_create= ("""
         artist VARCHAR(200),\
         auth VARCHAR(20),\
         firstName VARCHAR(50),\
-        gender VARCHAR(5),\
-        itemInSession INTEGER,\
+        gender CHAR(1),\
+        itemInSession SMALLINT,\
         lastName VARCHAR(50),\
-        length DOUBLE PRECISION,\
-        level VARCHAR(200),\
+        length REAL,\
+        level CHAR(4),\
         location VARCHAR(100),\
         method VARCHAR(10),\
-        page VARCHAR(200),\
+        page VARCHAR(20),\
         registration DOUBLE PRECISION,\
         sessionID INTEGER,\
         song VARCHAR(200),\
-        status INTEGER,\
+        status SMALLINT,\
         ts INTEGER,\
         userAgent VARCHAR(100),\
         userID INTEGER\
@@ -43,14 +43,14 @@ staging_events_table_create= ("""
 staging_songs_table_create = ("""
     CREATE TABLE staging_songs (\
         num_songs INTEGER,\
-        artist_id VARCHAR(50),\
+        artist_id CHAR(18),\
         artist_latitude DOUBLE PRECISION,\
         artist_longitude DOUBLE PRECISION,\
         artist_location VARCHAR(100),\
         artist_name VARCHAR(100),\
-        song_id VARCHAR(50),\
+        song_id CHAR(18),\
         title VARCHAR(200),\
-        duration VARCHAR(50),\
+        duration REAL,\
         year INTEGER\
     );
 """)
@@ -62,9 +62,9 @@ songplay_table_create = ("""
         songplay_id INTEGER NOT NULL,\
         start_time TIMESTAMP NOT NULL,\
         user_id  INTEGER NOT NULL,\
-        level VARCHAR(20) NOT NULL,\
-        song_id VARCHAR(50) NOT NULL,\
-        artist_id VARCHAR(50) NOT NULL,\
+        level CHAR(4) NOT NULL,\
+        song_id CHAR(18) NOT NULL,\
+        artist_id CHAR(18) NOT NULL,\
         session_id INTEGER NOT NULL,\
         location VARCHAR(100) NOT NULL,\
         user_agent VARCHAR(100) NOT NULL\
@@ -76,24 +76,24 @@ user_table_create = ("""
         user_id INTEGER NOT NULL,\
         first_name VARCHAR(50) NOT NULL,\
         last_name VARCHAR(50) NOT NULL,\
-        gender VARCHAR(5) NOT NULL,\                     
-        level VARCHAR(20) NOT NULL
+        gender CHAR(1) NOT NULL,\                     
+        level CHAR(4) NOT NULL
     );
 """)
 
 song_table_create = ("""
     CREATE TABLE songs (\
-        song_id VARCHAR(50) NOT NULL,\
+        song_id CHAR(18) NOT NULL,\
         title VARCHAR(200) NOT NULL,\
-        artist_id VARCHAR(50) NOT NULL,\
+        artist_id CHAR(18) NOT NULL,\
         year INTEGER NOT NULL,\            
-        duration DOUBLE PRECISION NOT NULL
+        duration REAL NOT NULL
     );
 """)
 
 artist_table_create = ("""
     CREATE TABLE artists (\
-        artist_id VARCHAR(50) NOT NULL,\
+        artist_id CHAR(18) NOT NULL,\
         name VARCHAR(100) NOT NULL,\
         location VARCHAR(100),\
         latitude DOUBLE PRECISION,\
@@ -115,12 +115,13 @@ time_table_create = ("""
 
 # STAGING TABLES
 
-
+<red> double check correct version!!!!!</red>
 staging_events_copy = ("""
     copy sporting_event_ticket from 's3://udacity-dend/log_data'
     credentials 'aws_iam_role={}'
     gzip delimiter ';' compupdate off region 'us-west-2';
     format as JSON 's3://udacity-dend/log_json_path.json';
+    JSON {path...}
 """).format(DWH_ROLE_ARN)
 
 staging_songs_copy = ("""
@@ -133,7 +134,7 @@ staging_songs_copy = ("""
 
 songplay_table_insert = ("""
     INSERT INTO songplay (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
-    SELECT\
+    SELECT DISTINCT\
         events.songplay_id,\
         CONCAT(LPAD(TO_CHAR(events.userID),4,'0'), CONCAT( LPAD(TO_CHAR(events.sessionID),5,'0'), LPAD(TO_CHAR(events.itemInSession),3,'0'))),\
         TO_TIMESTAMP(events.ts, 'YYYY-MM-DD HH24:MI:SS'),\
@@ -146,48 +147,52 @@ songplay_table_insert = ("""
         events.user_agent\
     FROM staging_events as events\
     JOIN staging_songs as songs\
-        on
+        ON events.artist=songs.artist_name\
+        AND events.song=songs.title\
     ;\
 """)
 
 user_table_insert = ("""
     INSERT INTO users (user_id, first_name, last_name, gender, level)\
-    SELECT\
+    SELECT DISTINCT\
         user_id,\
         firstName,\
         lastName,\
         gender,\
         level\
     FROM staging_events\
+    ;\
 """)
 
 song_table_insert = ("""
     INSERT INTO song (song_id,title,artist_id,year, duration)\
-    SELECT\
+    SELECT DISTINCT\
         song_id,\
         title,\
         artist_id,\
         year,\
         duration\
     FROM staging_songs\
-    ;
+    ;\
 """)
 
 artist_table_insert = ("""
     INSERT INTO artist (artist_id,name,location,latitude,longitude)\
-    SELECT\
+    SELECT DISTINCT\
         artist_id,\
         artist_name,\
         artist_location,\
         artist_latitude,\
         artist_longitude\
     FROM staging_songs\
-    ;
+    ;\
+    DROP TABLE staging_songs\
+    ;\
 """)
 
 time_table_insert = ("""
     INSERT INTO time (start_time,hour,day,week,month,year,weekday)\
-    SELECT\
+    SELECT DISTINCT\
         TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS'),\
         DATE_PART(hour,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
         DATE_PART(day,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
@@ -196,7 +201,9 @@ time_table_insert = ("""
         DATE_PART(year,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
         DATE_PART(dayofweek,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
     FROM staging_events\
-    ;
+    ;\
+    DROP TABLE staging_songs\
+    ;\
 """)
 
 
