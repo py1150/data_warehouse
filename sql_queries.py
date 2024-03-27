@@ -5,7 +5,9 @@ import configparser
 config = configparser.ConfigParser()
 config.read('dwh.cfg')
 DWH_ROLE_ARN           = config.get('IAM_ROLE','ARN')
-JSONPATH               = config.get('S3','LOG_JSONPATH')
+LOG_DATA               = config.get('S3','LOG_DATA')
+LOG_JSONPATH           = config.get('S3','LOG_JSONPATH')
+SONG_DATA              = config.get('S3','SONG_DATA')
 
 
 
@@ -38,8 +40,8 @@ staging_events_table_create= ("""\
         sessionID INTEGER,\
         song VARCHAR(200),\
         status SMALLINT,\
-        ts INTEGER,\
-        userAgent VARCHAR(100),\
+        ts BIGINT,\
+        userAgent VARCHAR(200),\
         userID INTEGER\
     );
 """)
@@ -120,17 +122,17 @@ time_table_create = ("""\
 # STAGING TABLES
 
 staging_events_copy = ("""\
-    copy sporting_event_ticket from 's3://udacity-dend/log_data'\
+    copy staging_events from '{}'\
     credentials 'aws_iam_role={}'\
-    gzip delimiter ';' compupdate off region 'us-west-2';\
-    format as JSON 's3://udacity-dend/log_json_path.json';\   
-""").format(DWH_ROLE_ARN, JSONPATH)
+    region 'us-west-2'\
+    format as JSON '{}';\
+""").format(LOG_DATA, DWH_ROLE_ARN, LOG_JSONPATH)
 
 staging_songs_copy = ("""\
-    copy sporting_event_ticket from 's3://udacity-dend/song_data'\
+    copy staging_songs from '{}'\
     credentials 'aws_iam_role={}'\
-    gzip delimiter ';' compupdate off region 'us-west-2';\
-""").format(DWH_ROLE_ARN)
+    JSON 'auto' region 'us-west-2';\
+""").format(SONG_DATA, DWH_ROLE_ARN)
 
 # FINAL TABLES
 

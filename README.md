@@ -79,6 +79,7 @@ The database... purpose....
             - delete cluster
             - delete IAM role
     - 1. create_tables.py
+        - check schema with _Query Editor_ (AWS Redshift console)
     - 2. etl.py
 
     
@@ -174,6 +175,16 @@ Insertion
 
 
 
+## Management Queries
+
+- check error
+```SQL
+select 	
+    starttime, filename, err_reason, colname, type, col_length, position, raw_field_value
+from stl_load_errors
+order by starttime desc
+; 
+```
 
 ## . Example Queries
 
@@ -187,3 +198,5 @@ https://docs.aws.amazon.com/redshift/latest/dg/r_TO_TIMESTAMP.html
 https://docs.aws.amazon.com/redshift/latest/dg/r_LPAD.html
 
 https://docs.aws.amazon.com/redshift/latest/dg/r_CONCAT.html
+
+https://docs.aws.amazon.com/redshift/latest/dg/r_STL_LOAD_ERRORS.html
