@@ -36,19 +36,45 @@ The database... purpose....
 - staging, final tables
 
 - Execution:   
-    - 0. set credentials / create redshift cluster
+- 0. setup ressources
+    - 0.1. Create an IAM User with Administrative permissions
+        - Attach Policy _AdministratorAccess_
+        - needed to perform AWS operations outlined below (e.g., create a new IAM Role)
+        --> store credentials in dwh.cfg
+    - 0.2. Create Ressources
         at end we need
             - redshift cluster endpoint
             - IAM role ARN
         (create resources)
         we have to create
-            - 0. create IAM user
-            - 1. IAM role with S3 read access (myRedshiftRole) - might be there already
+            - 0. create IAM user with Administrator access (see above)
+            - 1. IAM role with S3 read access (_dwhrole_) - might be there already
+                - specifically, we
+                    - create the role
+                    - attach the policy: _AmazonS3ReadOnlyAccess_
+                - --> creating the IAM Role renders the IAM role ARN
+                - --> we have to add it to _dwh.cfg_
+                - Output:
+                ```PYTHON
+                1.1 Creating a new IAM Role
+                1.2 Attaching Policy
+                1.3 Get the IAM role ARN
+                arn:aws:iam::137423019814:role/dwhRole
+                ```
             - 2. Redshift Cluster
+                - password is defined in dwh.cfg
+                    - must be at least 8 characters long
                 --> code 2.1. to get status (including _endpoint_)
                 --> code 2.2. to get cluster _endpoint and role ARN_ [there are 2 roles - IAM role see above and DWH role - here]
             - 3. tcp port to access the cluster endpoint (vpc)
-            - 4. make sure you can connect
+                - sg id: ```sg-0c365fc55381dced9```
+            - 4. check connection
+                - connection successful:
+                ```
+                postgresql://dwhprojectuser:$rtZ5l47@dwhcluster.cx4heaylzzsk.us-west-2.redshift.amazonaws.com:5439/dwh
+
+                'Connected: dwhprojectuser@dwh'
+                ```
         (delete resources)
             - delete cluster
             - delete IAM role

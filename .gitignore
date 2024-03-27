@@ -163,3 +163,5 @@ cython_debug/
 # custom
 /_orig
 dwh.cfg
+/dwhenv
+requirement.txt
