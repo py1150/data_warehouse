@@ -37,12 +37,12 @@ staging_events_table_create= ("""\
         method VARCHAR(10),\
         page VARCHAR(20),\
         registration DOUBLE PRECISION,\
-        sessionID INTEGER,\
+        sessionId INTEGER,\
         song VARCHAR(200),\
         status SMALLINT,\
         ts BIGINT,\
         userAgent VARCHAR(200),\
-        userID INTEGER\
+        userId INTEGER\
     );
 """)
 
@@ -137,17 +137,16 @@ staging_songs_copy = ("""\
 # FINAL TABLES
 
 songplay_table_insert = ("""\
-    INSERT INTO songplays (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
+    INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
     SELECT DISTINCT \
-        IDENTITY(0,1),\
         TO_TIMESTAMP(events.ts, 'YYYY-MM-DD HH24:MI:SS'),\
-        events.user_id,\
+        events.userId,\
         events.level,\
         songs.song_id,\
         songs.artist_id,\
-        events.session_id,\
+        events.sessionId,\
         events.location,\
-        events.user_agent\
+        events.userAgent\
     FROM staging_events as events\
     JOIN staging_songs as songs\
         ON events.artist=songs.artist_name\
@@ -158,7 +157,7 @@ songplay_table_insert = ("""\
 user_table_insert = ("""
     INSERT INTO users (user_id, first_name, last_name, gender, level)\
     SELECT DISTINCT\
-        user_id,\
+        userId,\
         firstName,\
         lastName,\
         gender,\

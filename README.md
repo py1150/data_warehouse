@@ -184,6 +184,9 @@ select
 from stl_load_errors
 order by starttime desc
 ; 
+
+SELECT * FROM staging_events limit 10;
+SELECT * FROM songplays limit 10;
 ```
 
 ## . Example Queries
@@ -202,3 +205,4 @@ https://docs.aws.amazon.com/redshift/latest/dg/r_LPAD.html
 https://docs.aws.amazon.com/redshift/latest/dg/r_CONCAT.html
 
 https://docs.aws.amazon.com/redshift/latest/dg/r_STL_LOAD_ERRORS.html
+
