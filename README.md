@@ -37,6 +37,21 @@ The database... purpose....
 
 - Execution:   
     - 0. set credentials / create redshift cluster
+        at end we need
+            - redshift cluster endpoint
+            - IAM role ARN
+        (create resources)
+        we have to create
+            - 0. create IAM user
+            - 1. IAM role with S3 read access (myRedshiftRole) - might be there already
+            - 2. Redshift Cluster
+                --> code 2.1. to get status (including _endpoint_)
+                --> code 2.2. to get cluster _endpoint and role ARN_ [there are 2 roles - IAM role see above and DWH role - here]
+            - 3. tcp port to access the cluster endpoint (vpc)
+            - 4. make sure you can connect
+        (delete resources)
+            - delete cluster
+            - delete IAM role
     - 1. create_tables.py
     - 2. etl.py
 
