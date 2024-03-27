@@ -5,14 +5,27 @@ from sql_queries import create_table_queries, drop_table_queries
 
 def drop_tables(cur, conn):
     for query in drop_table_queries:
+        print('\n\n')
+        print('-----------------')
+        print(f'_Executing the following query:_')
+        print(query)
         cur.execute(query)
         conn.commit()
+        print('_execution successful_')
+        print('-----------------')
 
 
 def create_tables(cur, conn):
     for query in create_table_queries:
+        print('\n\n')
+        print('-----------------')
+        print(f'_Executing the following query:_')
+        print(query)
         cur.execute(query)
         conn.commit()
+        print('_execution successful_')
+        print('-----------------')
+
 
 
 def main():
