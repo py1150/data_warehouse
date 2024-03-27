@@ -65,7 +65,7 @@ staging_songs_table_create = ("""\
 
 songplay_table_create = ("""\
     CREATE TABLE songplays (\
-        songplay_id INTEGER NOT NULL,\
+        songplay_id INTEGER IDENTITY(0,1) NOT NULL,\
         start_time TIMESTAMP NOT NULL,\
         user_id  INTEGER NOT NULL,\
         level CHAR(4) NOT NULL,\
@@ -137,10 +137,9 @@ staging_songs_copy = ("""\
 # FINAL TABLES
 
 songplay_table_insert = ("""\
-    INSERT INTO songplay (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
-    SELECT DISTINCT\
-        events.songplay_id,\
-        CONCAT(LPAD(TO_CHAR(events.userID),4,'0'), CONCAT( LPAD(TO_CHAR(events.sessionID),5,'0'), LPAD(TO_CHAR(events.itemInSession),3,'0'))),\
+    INSERT INTO songplays (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
+    SELECT DISTINCT \
+        IDENTITY(0,1),\
         TO_TIMESTAMP(events.ts, 'YYYY-MM-DD HH24:MI:SS'),\
         events.user_id,\
         events.level,\
@@ -169,7 +168,7 @@ user_table_insert = ("""
 """)
 
 song_table_insert = ("""
-    INSERT INTO song (song_id,title,artist_id,year, duration)\
+    INSERT INTO songs (song_id,title,artist_id,year, duration)\
     SELECT DISTINCT\
         song_id,\
         title,\
@@ -181,7 +180,7 @@ song_table_insert = ("""
 """)
 
 artist_table_insert = ("""
-    INSERT INTO artist (artist_id,name,location,latitude,longitude)\
+    INSERT INTO artists (artist_id,name,location,latitude,longitude)\
     SELECT DISTINCT\
         artist_id,\
         artist_name,\
@@ -203,7 +202,7 @@ time_table_insert = ("""
         DATE_PART(week,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
         DATE_PART(month,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
         DATE_PART(year,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
-        DATE_PART(dayofweek,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
+        DATE_PART(dayofweek,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS'))\
     FROM staging_events\
     ;\
     DROP TABLE staging_songs\
