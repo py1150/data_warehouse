@@ -4,6 +4,10 @@ import configparser
 # CONFIG
 config = configparser.ConfigParser()
 config.read('dwh.cfg')
+DWH_ROLE_ARN           = config.get('IAM_ROLE','ARN')
+JSONPATH               = config.get('S3','LOG_JSONPATH')
+
+
 
 # DROP TABLES
 
@@ -17,7 +21,7 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 
 # CREATE TABLES
 
-staging_events_table_create= ("""
+staging_events_table_create= ("""\
     CREATE TABLE staging_events (\
         artist VARCHAR(200),\
         auth VARCHAR(20),\
@@ -40,7 +44,7 @@ staging_events_table_create= ("""
     );
 """)
 
-staging_songs_table_create = ("""
+staging_songs_table_create = ("""\
     CREATE TABLE staging_songs (\
         num_songs INTEGER,\
         artist_id CHAR(18),\
@@ -57,7 +61,7 @@ staging_songs_table_create = ("""
 
    
 
-songplay_table_create = ("""
+songplay_table_create = ("""\
     CREATE TABLE songplays (\
         songplay_id INTEGER NOT NULL,\
         start_time TIMESTAMP NOT NULL,\
@@ -71,7 +75,7 @@ songplay_table_create = ("""
     );
 """)
 
-user_table_create = ("""
+user_table_create = ("""\
     CREATE TABLE users (\
         user_id INTEGER NOT NULL,\
         first_name VARCHAR(50) NOT NULL,\
@@ -81,7 +85,7 @@ user_table_create = ("""
     );
 """)
 
-song_table_create = ("""
+song_table_create = ("""\
     CREATE TABLE songs (\
         song_id CHAR(18) NOT NULL,\
         title VARCHAR(200) NOT NULL,\
@@ -91,7 +95,7 @@ song_table_create = ("""
     );
 """)
 
-artist_table_create = ("""
+artist_table_create = ("""\
     CREATE TABLE artists (\
         artist_id CHAR(18) NOT NULL,\
         name VARCHAR(100) NOT NULL,\
@@ -101,7 +105,7 @@ artist_table_create = ("""
     );
 """)
 
-time_table_create = ("""
+time_table_create = ("""\
     CREATE TABLE time (\
         start_time TIMESTAMP NOT NULL,\
         hour INTEGER NOT NULL,\
@@ -109,30 +113,28 @@ time_table_create = ("""
         week INTEGER NOT NULL,\
         month INTEGER NOT NULL,\
         year INTEGER NOT NULL,\
-        weekday INTEGER NOT NULL\        
+        weekday INTEGER NOT NULL\
     );
 """)
 
 # STAGING TABLES
 
-<red> double check correct version!!!!!</red>
-staging_events_copy = ("""
-    copy sporting_event_ticket from 's3://udacity-dend/log_data'
-    credentials 'aws_iam_role={}'
-    gzip delimiter ';' compupdate off region 'us-west-2';
-    format as JSON 's3://udacity-dend/log_json_path.json';
-    JSON {path...}
-""").format(DWH_ROLE_ARN)
+staging_events_copy = ("""\
+    copy sporting_event_ticket from 's3://udacity-dend/log_data'\
+    credentials 'aws_iam_role={}'\
+    gzip delimiter ';' compupdate off region 'us-west-2';\
+    format as JSON 's3://udacity-dend/log_json_path.json';\   
+""").format(DWH_ROLE_ARN, JSONPATH)
 
-staging_songs_copy = ("""
-    copy sporting_event_ticket from 's3://udacity-dend/song_data'
-    credentials 'aws_iam_role={}'
-    gzip delimiter ';' compupdate off region 'us-west-2';
+staging_songs_copy = ("""\
+    copy sporting_event_ticket from 's3://udacity-dend/song_data'\
+    credentials 'aws_iam_role={}'\
+    gzip delimiter ';' compupdate off region 'us-west-2';\
 """).format(DWH_ROLE_ARN)
 
 # FINAL TABLES
 
-songplay_table_insert = ("""
+songplay_table_insert = ("""\
     INSERT INTO songplay (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
     SELECT DISTINCT\
         events.songplay_id,\
