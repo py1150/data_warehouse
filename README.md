@@ -22,97 +22,73 @@ The details of the ETL pipeline outlined below, specifically:
 - the data schema
 - example queries for troubleshooting and analytic purposes.
 
-## Project Overview / Workflow
-- source data sets
-- staging, final tables
-
-- Execution:   
-- 0. setup ressources
-    - 0.1. Create an IAM User with Administrative permissions
-        - Attach Policy _AdministratorAccess_
-        - needed to perform AWS operations outlined below (e.g., create a new IAM Role)
-        --> store credentials in dwh.cfg
-    - 0.2. Create Ressources
-        at end we need
-            - redshift cluster endpoint
-            - IAM role ARN
-        (create resources)
-        we have to create
-            - 0. create IAM user with Administrator access (see above)
-            - 1. IAM role with S3 read access (_dwhrole_) - might be there already
-                - specifically, we
-                    - create the role
-                    - attach the policy: _AmazonS3ReadOnlyAccess_
-                - --> creating the IAM Role renders the IAM role ARN
-                - --> we have to add it to _dwh.cfg_
-                - Output:
-                ```PYTHON
-                1.1 Creating a new IAM Role
-                1.2 Attaching Policy
-                1.3 Get the IAM role ARN
-                arn:aws:iam::137423019814:role/dwhRole
-                ```
-            - 2. Redshift Cluster
-                - password is defined in dwh.cfg
-                    - must be at least 8 characters long
-                --> code 2.1. to get status (including _endpoint_)
-                --> code 2.2. to get cluster _endpoint and role ARN_ [there are 2 roles - IAM role see above and DWH role - here]
-            - 3. tcp port to access the cluster endpoint (vpc)
-                - sg id: ```sg-0c365fc55381dced9```
-            - 4. check connection
-                - connection successful:
-                ```
-                postgresql://dwhprojectuser:$rtZ5l47@dwhcluster.cx4heaylzzsk.us-west-2.redshift.amazonaws.com:5439/dwh
-
-                'Connected: dwhprojectuser@dwh'
-                ```
-        (delete resources)
-            - delete cluster
-            - delete IAM role
-    - 1. create_tables.py
-        - check schema with _Query Editor_ (AWS Redshift console)
-    - 2. etl.py
-
-- Load Tables
-    - for testing purposes performed with a subset
-- Insert
-    - Time format see https://docs.aws.amazon.com/redshift/latest/dg/r_Dateparts_for_datetime_functions.html
 
 ## 1. Code Worfklow
-**etl.py**   
-- loads configurations from _dwh.cfg_
-- loads sql_queries.py
-- executes load staging tables
-- inserts 
 
+The following sequence is necessary to execute the entire ETL:
+- 1. 00_create_delete_resources.ipynb
+- 2. create_tables.py
+- 3. etl.py
+
+### Main Codes
+
+These codes have to be executed to construct carry out the entire ETL pipeline.
+
+**00_create_delete_resources.ipynb**   
+- this file contains a Jupyter notebook with cells to 
+    - _set up_ and 
+    - _delete_   
+the required AWS ressources to <red>stop incurring AWS costs</red>.
+
+- An IAM user with Administrator access is required (policy _AdministratorAccess_)
+    - credentials have to be used for the connection to AWS to be able to create the ressources
+- All ressources must be set up before the ETL worfklow can proceed
+    - Specifically,    
+    - 1. we create an IAM role with S3 read access (_dwhrole_) 
+        - attach the policy: _AmazonS3ReadOnlyAccess_
+    - 2. we create a Redshift Cluster
+    - 3. open a TCP port to access the cluster endpoint (default vpc)
+- Also, the notebook contains code to check the connection to the Redshift cluster once the steps above are completed                
+- The notebook also contains code to delete
+    - the Redshift Cluster
+    - the IAM role
+
+**etl.py**   
+- loads configurations from _dwh.cfg_ (see below)
+- loads _sql_queries.py_
+- executes load staging tables
+- inserts data from staging tables into the final tables
+
+### Support Codes
+
+These codes are called by the main codes described above.
 
 **create_tables.py**  
-- loads configurations from _dwh.cfg_  
-- loads sql_queries.py  
-- drops tables  
-- creates tables  
+- loads configurations from _dwh.cfg_  (see below)
+- loads _sql_queries.py_  
+- drops tables if they already exist 
+- creates all tables with the defined schema
 
 **dwh.cfg**
-HOST=
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-DB_PORT=
-
+- **is not shared in this project due to confidentiality**
+- contains all configurations necessary to
+    - set up the AWS ressources (described above)
+    - interact with the Redshift cluster
 
 **sql_queries.py**    
-- input to: etl.py  
+- input to: create_tables, etl.py  
 - loads configurations from _dwh.cfg_
-- provides a list of queries
+- provides queries of the ETL
+- Insertion
+    - create a temporary staging tables
+    - we insert into the final tables from the staging tables
+    - we only select distinct rows
+    - delete the staging table after we are done
 
-- create_table_queries
-- drop_table_ queries
-- copy_table_queries  
-- insert_table_queries  
 
 ## 2. Schema for Song Play Analysis
 
-A description of the schema for the tables of the database is outlined below. 
+A description of the schema for final the tables of the database is outlined below. 
 
 For constructing the schema we followed the following principles:  
 **Schema**
@@ -130,27 +106,20 @@ For constructing the schema we followed the following principles:
     - allocate enough space to avoid insertion errors
 
 
-Below all tables and columns are listed. If a data type out of the usual choice (i.e., _VARCHAR_ for character and _INTEGER_ for numeric) was used, the datatype and a comment is noted next to the column name. For, the complete list of the assigned data types for every column, please refer to _sql_queries.py_ (create_table_queries). 
+Below all tables and columns are listed. If a data type out of the usual choice (i.e., _VARCHAR_ for character and _INTEGER_ for numeric) was used and/or a restriction was applied, the datatype/the restriction and a comment is noted next to the column name. For, the complete list of the assigned data types for every column, please refer to _sql_queries.py_ (create_table_queries). 
 
 
-- e.g., column gender is filled with 1 character with 1 byte ('F' or 'M') --> we can assign a fixed one-byte character: CHAR(1)
-
-Insertion
-- when inserting we 
-    - create a temporary staging table
-    - we insert into the final tables from the staging tables
-    - we only select distinct rows
-    [- delete the staging table after we are done]
 
 **Fact Table**
 1. <corn>songplays</corn> - records in event data associated with song plays i.e. records with page ```NextSong```
-    - songplay_id
-    - start_time
+    - songplay_id: we generate an index number; it should not be empty to identify the record --> integer with identity(0,1) NOT NULL
+    - start_time: date with time information; it should not be empty to identify the record --> timestamp NOT NULL
+        - _Note_ to obtain the information in timestamp format it needs to be converted from an integer format from the source. This was achieved as outlined in: https://docs.aws.amazon.com/redshift/latest/dg/r_Dateparts_for_datetime_functions.html (_for this and further references see section below_)
     - user_id
-    - level
-    - song_id 
-    - artist_id
-    - session_id 
+    - level: the number of characters is limited to 4 ASCII characters --> 4 bytes --> CHAR(4)
+    - song_id: alphanumeric string with fixed length --> CHAR(18) 
+    - artist_id: alphanumeric string with fixed length --> CHAR(18)
+    - session_id: it should not be empty to identify the record; NOT NULL 
     - location
     - user_agent
 
@@ -159,22 +128,22 @@ Insertion
     - user_id
     - first_name
     - last_name
-    - gender: 1 ASCII character --> 1 byte
-    - level
+    - gender: column contains one ASCII character --> 1 byte --> CHAR(1)
+    - level (_see above_)
 3. songs - songs in music database
     - song_id
     - title
-    - artist_id
+    - artist_id (_see above_)
     - year
-    - duration
+    - duration: decimal with 5 decimal places --> REAL
 4. artists - artists in music database
     - artist_id
     - name
     - location
-    - latitude
-    - longitude
+    - latitude: decimal value with mulitple decimal places --> DOUBLE PRECISION
+    - longitude: decimal value with mulitple decimal places --> DOUBLE PRECISION
 5. time - timestamps of records in songplays broken down into specific units
-    - start_time
+    - start_time (_see above_)
     - hour
     - day
     - week
@@ -182,9 +151,9 @@ Insertion
     - year
     - weekday
 
+## 3. Collection of Queries
 
-
-## Management Queries
+### Management Queries
 
 - check load error
 ```SQL
@@ -207,7 +176,7 @@ SELECT * FROM songs;
 DELETE FROM songs;
 ```
 
-## Example Analytical Query
+### Example Analytical Query
 
 The query below is an example of the information which could be retrieved by business users from the database. The example below is also contained in _etl.py_.
 
@@ -234,7 +203,7 @@ left join songs
 ```
 
 
-## References
+## 4. References
 **AWS Redshift Documentation**
 As a reference guide the AWS Redshift Documentation was used. In particular, the following ressources were used during the construction of the ETL:
 
