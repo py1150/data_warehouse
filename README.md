@@ -8,6 +8,9 @@
 </style>
 
 <green>
+- 2024/03/28
+    - staging songs is empty!!!
+    - try join as testquery
 - 2024/03/27
     - create_tables.py: 
         - review data types - see Eagar(2023) p.278f  [x]
