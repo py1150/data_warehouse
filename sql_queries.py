@@ -189,8 +189,6 @@ artist_table_insert = ("""
         artist_longitude\
     FROM staging_songs\
     ;\
-    DROP TABLE staging_songs\
-    ;\
 """)
 
 time_table_insert = ("""
@@ -204,8 +202,6 @@ time_table_insert = ("""
         DATEPART(year, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
         DATEPART(dayofweek, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second'))\
     FROM staging_events\
-    ;\
-    DROP TABLE staging_songs\
     ;\
 """)
 

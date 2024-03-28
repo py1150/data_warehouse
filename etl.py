@@ -27,10 +27,7 @@ def insert_tables(cur, conn):
         try:
             cur.execute(query)
             conn.commit()
-            print('_execution successful_')
-            print('_Result:')
-            row = cur.fetchone()            
-            print(row)            
+            print('_execution successful_')            
             print('-----------------')
         except psycopg2.Error as e:
             print(f'\n***Error during inserting tables with: {e}')
@@ -46,6 +43,9 @@ def validate_tables(cur,conn):
             cur.execute(query)
             conn.commit()
             print('_execution successful_')
+            print('_Result:')
+            row = cur.fetchone()            
+            print(row)
             print('-----------------')
         except psycopg2.Error as e:
             print(f'\n***Error during validating tables with: {e}')
