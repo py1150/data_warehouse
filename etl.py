@@ -64,7 +64,8 @@ def main():
     DB_PASSWORD        = config.get('CLUSTER','DB_PASSWORD')
     DB_PORT            = config.get('CLUSTER','DB_PORT')
 
-    ARN = config.get('IAM_ROLE','ARN')    
+    ARN = config.get('IAM_ROLE','ARN')
+    print('--------')    
     print('Configurations retrieved')
     print(f'roleARN is: {ARN}\n')
 
@@ -76,7 +77,7 @@ def main():
         #conn = psycopg2.connect("host={} dbname={} user={} password={} port={}"\
         #    .format(HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT))
         cur = conn.cursor()
-        print('--------')
+        
         print(f'connected with: {conn_string}')        
         print('--------')
     except psycopg2.Error as e:
@@ -88,7 +89,6 @@ def main():
     # insert from staging into final tables
     insert_tables(cur, conn)
     
-
     # validate
     validate_tables(cur, conn)
     

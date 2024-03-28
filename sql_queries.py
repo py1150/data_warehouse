@@ -140,7 +140,7 @@ staging_songs_copy = ("""\
 songplay_table_insert = ("""\
     INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)\
     SELECT DISTINCT \
-        TO_TIMESTAMP(events.ts, 'YYYY-MM-DD HH24:MI:SS'),\
+        (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second'),\
         events.userId,\
         events.level,\
         songs.song_id,\
@@ -149,7 +149,7 @@ songplay_table_insert = ("""\
         events.location,\
         events.userAgent\
     FROM staging_events as events\
-    JOIN staging_songs as songs\
+    LEFT OUTER JOIN staging_songs as songs\
         ON events.artist=songs.artist_name\
         AND events.song=songs.title\
     ;\
@@ -196,13 +196,13 @@ artist_table_insert = ("""
 time_table_insert = ("""
     INSERT INTO time (start_time,hour,day,week,month,year,weekday)\
     SELECT DISTINCT\
-        TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS'),\
-        DATE_PART(hour,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
-        DATE_PART(day,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
-        DATE_PART(week,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
-        DATE_PART(month,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
-        DATE_PART(year,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS')),\
-        DATE_PART(dayofweek,TO_TIMESTAMP(ts, 'YYYY-MM-DD HH24:MI:SS'))\
+        (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second'),\
+        DATEPART(hour, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
+        DATEPART(day, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
+        DATEPART(week, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
+        DATEPART(month, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
+        DATEPART(year, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
+        DATEPART(dayofweek, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second'))\        
     FROM staging_events\
     ;\
     DROP TABLE staging_songs\

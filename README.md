@@ -85,7 +85,11 @@ The database... purpose....
         - check schema with _Query Editor_ (AWS Redshift console)
     - 2. etl.py
 
-    
+- Load Tables
+    - comments
+
+- Insert
+    - Time format see https://docs.aws.amazon.com/redshift/latest/dg/r_Dateparts_for_datetime_functions.html
 
 ## 1. Code Worfklow
 **etl.py**   
@@ -180,16 +184,25 @@ Insertion
 
 ## Management Queries
 
-- check error
+- check load error
 ```SQL
 select 	
     starttime, filename, err_reason, colname, type, col_length, position, raw_field_value
 from stl_load_errors
 order by starttime desc
 ; 
+```
 
+- check content of tables
+```SQL
 SELECT * FROM staging_events limit 10;
+SELECT * FROM staging_songs limit 10;
 SELECT * FROM songplays limit 10;
+SELECT * FROM songs;
+```
+
+```SQL
+DELETE FROM songs;
 ```
 
 ## . Example Queries
@@ -208,4 +221,6 @@ https://docs.aws.amazon.com/redshift/latest/dg/r_LPAD.html
 https://docs.aws.amazon.com/redshift/latest/dg/r_CONCAT.html
 
 https://docs.aws.amazon.com/redshift/latest/dg/r_STL_LOAD_ERRORS.html
+
+https://docs.aws.amazon.com/redshift/latest/dg/r_Dateparts_for_datetime_functions.html
 
