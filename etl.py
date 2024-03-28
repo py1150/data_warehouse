@@ -1,6 +1,6 @@
 import configparser
 import psycopg2
-from sql_queries import copy_table_queries, insert_table_queries, validate_table_queries
+from sql_queries import copy_table_queries, insert_table_queries, validate_table_queries, analytic_queries
 
 
 def load_staging_tables(cur, conn):
@@ -50,6 +50,24 @@ def validate_tables(cur,conn):
         except psycopg2.Error as e:
             print(f'\n***Error during validating tables with: {e}')
 
+def query_test(cur,conn):
+    for query in analytic_queries:
+        print('\n\n')
+        print('-----------------')
+        print(f'_Executing the following query:_')
+        print(query)
+        try:
+            cur.execute(query)
+            conn.commit()
+            print('_execution successful_')
+            print('_Result:')
+            print('The most listened to song on Sundays is:')
+            row = cur.fetchone()            
+            print(row[1])
+            print('-----------------')
+        except psycopg2.Error as e:
+            print(f'\n***Error during test query with: {e}')
+
 
 def main():
     
@@ -91,6 +109,9 @@ def main():
     
     # validate
     validate_tables(cur, conn)
+
+    # test analytic query
+    query_test(cur, conn)
     
     # close the connection
     conn.close()

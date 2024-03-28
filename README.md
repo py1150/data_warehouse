@@ -206,6 +206,49 @@ DELETE FROM songs;
 
 ## . Example Queries
 
+
+PLEASE use your imagination here. For example, what is the most played song? When is the highest usage time of day by hour for songs? It would not take much to imagine what types of questions that corporate users of the system would find interesting. Including those queries and the answers makes your project far more compelling when using it as an example of your work to people / companies that would be interested. You could simply have a section of sql_queries.py that is executed after the load is done that prints a question and then the answer.
+
+
+
+- most played song during weekends
+    
+    select
+        a.song_id,
+        b.title,    
+        count(*) as n
+    from songplays as a
+    left join songs as b
+        on a.song_id=b.song_id
+    group by plays.song_id,songs.title
+
+    
+    where datepart start_time ...
+- favorite band of free accounts vs paid accounts
+
+- when (hour of day) do women and men listen most
+
+
+/*most played song on sunday*/
+select
+	a.song_id
+    ,songs.title
+from (
+    select 
+            song_id
+            ,count(*) as n
+    from songplays
+    where DATEPART(day, start_time)=7
+    group by song_id
+    order by count(*) desc
+    limit 1
+  	) as a
+left join songs
+	on a.song_id=songs.song_id
+;
+
+
+
 ## References
 - AWS Redshift Documentation
 

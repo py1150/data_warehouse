@@ -213,6 +213,26 @@ artist_table_validate = ("""SELECT count(*) from artists;""")
 time_table_validate = ("""SELECT count(*) from time;""")
 
 
+# EXAMPLE ANALYTIC QUERY
+analytic_query = ("""\
+    SELECT\
+        a.song_id\
+        ,songs.title\
+    FROM (\
+        SELECT\
+                song_id\
+                ,count(*) as n\
+        FROM songplays\
+        WHERE DATEPART(day, start_time)=7\
+        GROUP BY song_id\
+        ORDER BY count(*) desc\
+        limit 1\
+        ) as a\
+    left join songs\
+        on a.song_id=songs.song_id\
+    ;\
+""")
+
 # QUERY LISTS
 
 create_table_queries = [staging_events_table_create, staging_songs_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
@@ -220,3 +240,4 @@ drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, songp
 copy_table_queries = [staging_events_copy, staging_songs_copy]
 insert_table_queries = [songplay_table_insert, user_table_insert, song_table_insert, artist_table_insert, time_table_insert]
 validate_table_queries = [songplay_table_validate, song_table_validate, user_table_validate, artist_table_validate, time_table_validate]
+analytic_queries = [analytic_query]
