@@ -86,8 +86,7 @@ The database... purpose....
     - 2. etl.py
 
 - Load Tables
-    - comments
-
+    - for testing purposes performed with a subset
 - Insert
     - Time format see https://docs.aws.amazon.com/redshift/latest/dg/r_Dateparts_for_datetime_functions.html
 

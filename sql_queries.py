@@ -69,11 +69,11 @@ songplay_table_create = ("""\
         start_time TIMESTAMP NOT NULL,\
         user_id  INTEGER NOT NULL,\
         level CHAR(4) NOT NULL,\
-        song_id CHAR(18) NOT NULL,\
-        artist_id CHAR(18) NOT NULL,\
+        song_id CHAR(18),\
+        artist_id CHAR(18),\
         session_id INTEGER NOT NULL,\
         location VARCHAR(100) NOT NULL,\
-        user_agent VARCHAR(100) NOT NULL\
+        user_agent VARCHAR(200) NOT NULL\
     );
 """)
 
@@ -202,7 +202,7 @@ time_table_insert = ("""
         DATEPART(week, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
         DATEPART(month, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
         DATEPART(year, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second')),\
-        DATEPART(dayofweek, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second'))\        
+        DATEPART(dayofweek, (TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second'))\
     FROM staging_events\
     ;\
     DROP TABLE staging_songs\
