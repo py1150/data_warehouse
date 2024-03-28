@@ -67,40 +67,40 @@ songplay_table_create = ("""\
     CREATE TABLE songplays (\
         songplay_id INTEGER IDENTITY(0,1) NOT NULL,\
         start_time TIMESTAMP NOT NULL,\
-        user_id  INTEGER NOT NULL,\
-        level CHAR(4) NOT NULL,\
+        user_id  INTEGER,\
+        level CHAR(4),\
         song_id CHAR(18),\
         artist_id CHAR(18),\
         session_id INTEGER NOT NULL,\
-        location VARCHAR(100) NOT NULL,\
-        user_agent VARCHAR(200) NOT NULL\
+        location VARCHAR(100),\
+        user_agent VARCHAR(200)\
     );
 """)
 
 user_table_create = ("""\
     CREATE TABLE users (\
-        user_id INTEGER NOT NULL,\
-        first_name VARCHAR(50) NOT NULL,\
-        last_name VARCHAR(50) NOT NULL,\
-        gender CHAR(1) NOT NULL,\
-        level CHAR(4) NOT NULL
+        user_id INTEGER,\
+        first_name VARCHAR(50),\
+        last_name VARCHAR(50),\
+        gender CHAR(1),\
+        level CHAR(4)
     );
 """)
 
 song_table_create = ("""\
     CREATE TABLE songs (\
-        song_id CHAR(18) NOT NULL,\
-        title VARCHAR(200) NOT NULL,\
-        artist_id CHAR(18) NOT NULL,\
-        year INTEGER NOT NULL,\
-        duration REAL NOT NULL
+        song_id CHAR(18),\
+        title VARCHAR(200),\
+        artist_id CHAR(18),\
+        year INTEGER,\
+        duration REAL
     );
 """)
 
 artist_table_create = ("""\
     CREATE TABLE artists (\
-        artist_id CHAR(18) NOT NULL,\
-        name VARCHAR(100) NOT NULL,\
+        artist_id CHAR(18),\
+        name VARCHAR(100),\
         location VARCHAR(100),\
         latitude DOUBLE PRECISION,\
         longitude DOUBLE PRECISION
@@ -110,12 +110,12 @@ artist_table_create = ("""\
 time_table_create = ("""\
     CREATE TABLE time (\
         start_time TIMESTAMP NOT NULL,\
-        hour INTEGER NOT NULL,\
-        day INTEGER NOT NULL,\
-        week INTEGER NOT NULL,\
-        month INTEGER NOT NULL,\
-        year INTEGER NOT NULL,\
-        weekday INTEGER NOT NULL\
+        hour INTEGER,\
+        day INTEGER,\
+        week INTEGER,\
+        month INTEGER,\
+        year INTEGER,\
+        weekday INTEGER\
     );
 """)
 
