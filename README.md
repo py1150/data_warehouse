@@ -7,32 +7,20 @@
     yellow { color: yellow }
 </style>
 
-<green>
-- 2024/03/28
-    - staging songs is empty!!!
-    - try join as testquery
-- 2024/03/27
-    - create_tables.py: 
-        - review data types - see Eagar(2023) p.278f  [x]
-            - assign minimal storage size
-        - update staging tales
-            - use merge functionality
-             --> this handles duplicates
-                --> we use distinct                 [x]
-    - AWS console
-        - create new IAM user
-        (with myRedshift role)
-    - new codes
-        - create redshift cluster
-        - destroy redhisft cluster
-</green>
-
 # Data_warehouse
 Udacity Nanodegree Data Engineering with AWS Project 2
 
 ## 0. Overview
+Sparkify is a music stream startup. They want to move their song database and their proceses to the cloud.
 
-The database... purpose....
+Their analytic target is to understand which songs their users are listening to.
+
+For this purpose we constructed a cloud-based ETL pipeline which extracts data from AWS S3, loads them into staging tables in AWS Redshift and transforms the data into final tables which can be used as the bassi for anylsis.
+
+The details of the ETL pipeline outlined below, specifically:
+- its workflow
+- the data schema
+- example queries for troubleshooting and analytic purposes.
 
 ## Project Overview / Workflow
 - source data sets
@@ -124,23 +112,38 @@ DB_PORT=
 
 ## 2. Schema for Song Play Analysis
 
-Principles
-- Star schema
-- 2 major data types: character, numeric
-- if there is a choice, we assign the smallest possible size
-    - avoid excess capacities 
-    - e.g., column gender is filled with 1 character with 1 byte ('F' or 'M') --> we can assign a fixed one-byte character: CHAR(1)
+A description of the schema for the tables of the database is outlined below. 
+
+For constructing the schema we followed the following principles:  
+**Schema**
+- the tables are aligned in a _star schema_ in order to:
+    - enable an organization which is intuitive for the business users when they try to answer their analytical questions  
+
+**Data Types**  
+- we use 3 major data types: 
+    - _character_
+    - _numeric_
+    - _timestamp_ 
+- On the specific data types on column level, please read below
+- if there is a choice, we assign the _smallest possible size_ to each column in order to
+    - avoid excess capacities and other hand to     
     - allocate enough space to avoid insertion errors
+
+
+Below all tables and columns are listed. If a data type out of the usual choice (i.e., _VARCHAR_ for character and _INTEGER_ for numeric) was used, the datatype and a comment is noted next to the column name. For, the complete list of the assigned data types for every column, please refer to _sql_queries.py_ (create_table_queries). 
+
+
+- e.g., column gender is filled with 1 character with 1 byte ('F' or 'M') --> we can assign a fixed one-byte character: CHAR(1)
 
 Insertion
 - when inserting we 
     - create a temporary staging table
     - we insert into the final tables from the staging tables
     - we only select distinct rows
-    - delete the staging table after we are done
+    [- delete the staging table after we are done]
 
 **Fact Table**
-1. songplays - records in event data associated with song plays i.e. records with page ```NextSong```
+1. <corn>songplays</corn> - records in event data associated with song plays i.e. records with page ```NextSong```
     - songplay_id
     - start_time
     - user_id
@@ -204,31 +207,13 @@ SELECT * FROM songs;
 DELETE FROM songs;
 ```
 
-## . Example Queries
+## Example Analytical Query
 
+The query below is an example of the information which could be retrieved by business users from the database. The example below is also contained in _etl.py_.
 
-PLEASE use your imagination here. For example, what is the most played song? When is the highest usage time of day by hour for songs? It would not take much to imagine what types of questions that corporate users of the system would find interesting. Including those queries and the answers makes your project far more compelling when using it as an example of your work to people / companies that would be interested. You could simply have a section of sql_queries.py that is executed after the load is done that prints a question and then the answer.
-
-
-
-- most played song during weekends
-    
-    select
-        a.song_id,
-        b.title,    
-        count(*) as n
-    from songplays as a
-    left join songs as b
-        on a.song_id=b.song_id
-    group by plays.song_id,songs.title
-
-    
-    where datepart start_time ...
-- favorite band of free accounts vs paid accounts
-
-- when (hour of day) do women and men listen most
-
-
+- most played song on sunday
+   
+```SQL
 /*most played song on sunday*/
 select
 	a.song_id
@@ -246,11 +231,12 @@ from (
 left join songs
 	on a.song_id=songs.song_id
 ;
-
+```
 
 
 ## References
-- AWS Redshift Documentation
+**AWS Redshift Documentation**
+As a reference guide the AWS Redshift Documentation was used. In particular, the following ressources were used during the construction of the ETL:
 
 https://docs.aws.amazon.com/redshift/latest/dg/c_Supported_data_types.html
 
@@ -258,11 +244,9 @@ https://docs.aws.amazon.com/redshift/latest/dg/r_DATE_PART_function.html
 
 https://docs.aws.amazon.com/redshift/latest/dg/r_TO_TIMESTAMP.html
 
-https://docs.aws.amazon.com/redshift/latest/dg/r_LPAD.html
-
-https://docs.aws.amazon.com/redshift/latest/dg/r_CONCAT.html
+https://docs.aws.amazon.com/redshift/latest/dg/r_Dateparts_for_datetime_functions.html
 
 https://docs.aws.amazon.com/redshift/latest/dg/r_STL_LOAD_ERRORS.html
 
-https://docs.aws.amazon.com/redshift/latest/dg/r_Dateparts_for_datetime_functions.html
+
 
