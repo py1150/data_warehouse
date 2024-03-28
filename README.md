@@ -26,9 +26,9 @@ The details of the ETL pipeline outlined below, specifically:
 ## 1. Code Worfklow
 
 The following sequence is necessary to execute the entire ETL:
-- 1. 00_create_delete_resources.ipynb
-- 2. create_tables.py
-- 3. etl.py
+1. 00_create_delete_resources.ipynb
+2. create_tables.py
+3. etl.py
 
 ### Main Codes
 
@@ -71,6 +71,7 @@ These codes are called by the main codes described above.
 
 **dwh.cfg**
 - **is not shared in this project due to confidentiality**
+    - _Note:_ for illustration a skeleton of the file including the source data paths (S3) is contained in the respository as **dwh_blue.cfg**    
 - contains all configurations necessary to
     - set up the AWS ressources (described above)
     - interact with the Redshift cluster
@@ -101,7 +102,7 @@ For constructing the schema we followed the following principles:
     - _numeric_
     - _timestamp_ 
 - On the specific data types on column level, please read below
-- if there is a choice, we assign the _smallest possible size_ to each column in order to
+- if there is a choice, we try to assign the _smallest possible size_ to each column in order to
     - avoid excess capacities and other hand to     
     - allocate enough space to avoid insertion errors
 
@@ -112,69 +113,50 @@ Below all tables and columns are listed. If a data type out of the usual choice 
 
 **Fact Table**
 1. <corn>songplays</corn> - records in event data associated with song plays i.e. records with page ```NextSong```
-    - songplay_id: we generate an index number; it should not be empty to identify the record --> integer with identity(0,1) NOT NULL
-    - start_time: date with time information; it should not be empty to identify the record --> timestamp NOT NULL
+    - _songplay_id_: we generate an index number; it should not be empty to identify the record --> integer with identity(0,1) NOT NULL
+    - _start_time_: date with time information; it should not be empty to identify the record --> timestamp NOT NULL
         - _Note_ to obtain the information in timestamp format it needs to be converted from an integer format from the source. This was achieved as outlined in: https://docs.aws.amazon.com/redshift/latest/dg/r_Dateparts_for_datetime_functions.html (_for this and further references see section below_)
-    - user_id
-    - level: the number of characters is limited to 4 ASCII characters --> 4 bytes --> CHAR(4)
-    - song_id: alphanumeric string with fixed length --> CHAR(18) 
-    - artist_id: alphanumeric string with fixed length --> CHAR(18)
-    - session_id: it should not be empty to identify the record; NOT NULL 
-    - location
-    - user_agent
+    - _user_id_
+    - _level_: the number of characters is limited to 4 ASCII characters --> 4 bytes --> CHAR(4)
+    - _song_id_: alphanumeric string with fixed length --> CHAR(18) 
+    - _artist_id_: alphanumeric string with fixed length --> CHAR(18)
+    - _session_id_: it should not be empty to identify the record; NOT NULL 
+    - _location_
+    - _user_agent_
 
-**Dimension Tables**
-2. users - users in the app
-    - user_id
-    - first_name
-    - last_name
-    - gender: column contains one ASCII character --> 1 byte --> CHAR(1)
-    - level (_see above_)
-3. songs - songs in music database
-    - song_id
-    - title
-    - artist_id (_see above_)
-    - year
-    - duration: decimal with 5 decimal places --> REAL
+**Dimension Tables**  
+
+2. users - users in the app  
+    - _user_id_  
+    - _first_name_  
+    - _last_name_  
+    - _gender_: column contains one ASCII character --> 1 byte --> CHAR(1)  
+    - _level_: (_see above_) 
+
+3. songs - songs in music database  
+    - _song_id_  
+    - _title_
+    - _artist_id_ (_see above_)
+    - _year_
+    - _duration_: decimal with 5 decimal places --> REAL  
+
 4. artists - artists in music database
-    - artist_id
-    - name
-    - location
-    - latitude: decimal value with mulitple decimal places --> DOUBLE PRECISION
-    - longitude: decimal value with mulitple decimal places --> DOUBLE PRECISION
+    - _artist_id_
+    - _name_
+    - _location_
+    - _latitude_: decimal value with mulitple decimal places --> DOUBLE PRECISION
+    - _longitude_: decimal value with mulitple decimal places --> DOUBLE PRECISION
+
 5. time - timestamps of records in songplays broken down into specific units
-    - start_time (_see above_)
-    - hour
-    - day
-    - week
-    - month
-    - year
-    - weekday
+    - _start_time_ (_see above_)
+    - _hour_
+    - _day_
+    - _week_
+    - _month_
+    - _year_
+    - _weekday_
 
 ## 3. Collection of Queries
-
-### Management Queries
-
-- check load error
-```SQL
-select 	
-    starttime, filename, err_reason, colname, type, col_length, position, raw_field_value
-from stl_load_errors
-order by starttime desc
-; 
-```
-
-- check content of tables
-```SQL
-SELECT * FROM staging_events limit 10;
-SELECT * FROM staging_songs limit 10;
-SELECT * FROM songplays limit 10;
-SELECT * FROM songs;
-```
-
-```SQL
-DELETE FROM songs;
-```
 
 ### Example Analytical Query
 
@@ -202,9 +184,36 @@ left join songs
 ;
 ```
 
+### Management Queries
+These queries are examples to check the content of the database.
+
+- check load error
+```SQL
+select 	
+    starttime, filename, err_reason, colname, type, col_length, position, raw_field_value
+from stl_load_errors
+order by starttime desc
+; 
+```
+
+- check content of tables
+```SQL
+SELECT * FROM staging_events limit 10;
+SELECT * FROM staging_songs limit 10;
+SELECT * FROM songplays limit 10;
+SELECT * FROM songs;
+```
+
+- delete all rows in a table
+```SQL
+DELETE FROM songs;
+```
+
+
+
 
 ## 4. References
-**AWS Redshift Documentation**
+**AWS Redshift Documentation**  
 As a reference guide the AWS Redshift Documentation was used. In particular, the following ressources were used during the construction of the ETL:
 
 https://docs.aws.amazon.com/redshift/latest/dg/c_Supported_data_types.html
