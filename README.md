@@ -1,12 +1,3 @@
-<style>
-    blue { color: blue }
-    aqua { color: aqua }
-    corn { color: cornflowerblue }
-    red { color: red }
-    green { color: chartreuse }
-    yellow { color: yellow }
-</style>
-
 # Data_warehouse
 Udacity Nanodegree Data Engineering with AWS Project 2
 
